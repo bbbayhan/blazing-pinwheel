@@ -8,7 +8,7 @@
   --accent-glow: rgba(56, 189, 248, 0.3);
   --border: rgba(148, 163, 184, 0.1);
   --glass-border: rgba(255, 255, 255, 0.05);
-  
+
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -21,7 +21,7 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   /* Subtle gradient background */
-  background-image: 
+  background-image:
     radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
   background-attachment: fixed;
@@ -48,7 +48,8 @@ button {
 
 .btn-primary {
   background: var(--accent);
-  color: #0f172a; /* Dark text on bright accent */
+  color: #0f172a;
+  /* Dark text on bright accent */
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
@@ -86,7 +87,8 @@ button {
   border-color: var(--text-secondary);
 }
 
-input, select {
+input,
+select {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid var(--border);
   color: var(--text-primary);
@@ -98,7 +100,8 @@ input, select {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-glow);
@@ -138,7 +141,9 @@ input:focus, select:focus {
   gap: 0.5rem;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: 700;
   letter-spacing: -0.025em;
   margin: 0;
@@ -149,6 +154,36 @@ h1, h2, h3 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .grid-books {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+    gap: 1rem;
+  }
+
+  .glass-panel {
+    padding: 1.5rem !important;
+  }
+
+  h1 {
+    font-size: 1.25rem !important;
+  }
+
+  h2 {
+    font-size: 1.1rem !important;
+  }
 }

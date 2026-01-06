@@ -87,11 +87,14 @@ export const processImage = async (file: File): Promise<Book[]> => {
             return [];
         }
 
+        // Create full data URI for storage
+        const fullDataUri = `data:${file.type};base64,${base64Image}`;
+
         return uniqueChunks.map((chunk: string) => ({
             id: uuidv4(),
             title: chunk, // Assume the chunk is the title
             author: 'Unknown', // User needs to fill this
-            coverUrl: URL.createObjectURL(file),
+            coverUrl: fullDataUri,
             dateAdded: Date.now(),
             year: '',
         }));
@@ -116,11 +119,17 @@ const MOCK_AUTHORS = [
 ];
 
 const mockProcessImage = async (file: File): Promise<Book[]> => {
+    // Convert to base64 even for mock so it persists
+    const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+    });
+
     return new Promise((resolve) => {
         setTimeout(() => {
             const count = Math.floor(Math.random() * 3) + 1;
             const detectedBooks: Book[] = [];
-            const imageUrl = URL.createObjectURL(file);
 
             for (let i = 0; i < count; i++) {
                 const idx = Math.floor(Math.random() * MOCK_TITLES.length);
@@ -128,7 +137,7 @@ const mockProcessImage = async (file: File): Promise<Book[]> => {
                     id: uuidv4(),
                     title: MOCK_TITLES[idx],
                     author: MOCK_AUTHORS[idx],
-                    coverUrl: imageUrl,
+                    coverUrl: base64,
                     dateAdded: Date.now(),
                     year: '202' + Math.floor(Math.random() * 5)
                 });
