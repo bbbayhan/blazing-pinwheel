@@ -4,7 +4,7 @@ import { auth } from '../firebase-config';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/books';
 
 const getAuthHeaders = async () => {
-    const token = await auth.currentUser?.getIdToken();
+    const token = await auth?.currentUser?.getIdToken();
     return {
         'Content-Type': 'application/json',
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})

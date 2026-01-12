@@ -20,6 +20,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!auth) {
+            setLoading(false);
+            return;
+        }
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             setLoading(false);
@@ -28,14 +32,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const login = async () => {
+        if (!auth) {
+            alert("Authentication is disabled in this environment (missing config).");
+            return;
+        }
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
     };
 
-    const logout = () => signOut(auth);
+    const logout = async () => {
+        if (auth) await signOut(auth);
+    };
 
     const getToken = async () => {
-        if (user) {
+        if (user && auth) {
             return await user.getIdToken();
         }
         return null;

@@ -10,29 +10,50 @@ const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const DB_MODE = process.env.DATABASE_URL ? 'POSTGRES' : 'SQLITE';
+
+// Helper to check if URL is real
+const isRealDbUrl = (url) => {
+    return url && url.includes('postgres') && !url.includes('user:password@host');
+};
+
+const DB_MODE = isRealDbUrl(process.env.DATABASE_URL) ? 'POSTGRES' : 'SQLITE';
 
 console.log(`Starting server in ${DB_MODE} mode.`);
+if (process.env.DATABASE_URL && !isRealDbUrl(process.env.DATABASE_URL)) {
+    console.warn("Ignoring DATABASE_URL as it appears to be a placeholder.");
+}
+
+let firebaseAdminReady = false;
 
 // --- Firebase Admin Setup ---
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    try {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
-        console.log("Firebase Admin initialized with service account.");
-    } catch (e) {
-        console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT:", e);
+const initFirebaseAdmin = () => {
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        try {
+            const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount)
+            });
+            firebaseAdminReady = true;
+            console.log("Firebase Admin initialized with service account.");
+        } catch (e) {
+            console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT:", e);
+        }
+    } else {
+        try {
+            // Check if GOOGLE_APPLICATION_CREDENTIALS is valid file if set, or just try init
+            if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+                admin.initializeApp();
+                firebaseAdminReady = true;
+                console.log("Firebase Admin initialized (via GOOGLE_APPLICATION_CREDENTIALS).");
+            } else {
+                console.log("No Firebase credentials found. Auth strictly disabled for writing.");
+            }
+        } catch (e) {
+            console.warn("Firebase Admin failed to init:", e);
+        }
     }
-} else {
-    try {
-        admin.initializeApp();
-        console.log("Firebase Admin initialized (default credentials).");
-    } catch (e) {
-        console.warn("Firebase Admin not initialized. Auth checks will fail if enabled.");
-    }
-}
+};
+initFirebaseAdmin();
 
 // --- Database Setup ---
 let dbPostgres;
@@ -82,6 +103,13 @@ app.use(express.json({ limit: '50mb' }));
 // Auth Middleware
 const requireAuth = async (req, res, next) => {
     if (req.method === 'GET') return next(); // Allow read-only
+
+    if (!firebaseAdminReady) {
+        console.warn("Blocking write request: Firebase Admin not configured.");
+        return res.status(500).json({
+            error: 'Server is not configured for Authentication. Please set up FIREBASE_SERVICE_ACCOUNT or GOOGLE_APPLICATION_CREDENTIALS, or ADMIN_EMAIL.'
+        });
+    }
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -197,12 +225,7 @@ app.post('/api/books', async (req, res) => {
                 `;
                 for (const book of books) {
                     await client.query(queryText, [
-                        book.id,
-                        book.title,
-                        book.author,
-                        book.year || '',
-                        book.coverUrl,
-                        book.dateAdded
+                        book.id, book.title, book.author, book.year || '', book.coverUrl, book.dateAdded
                     ]);
                 }
                 await client.query('COMMIT');

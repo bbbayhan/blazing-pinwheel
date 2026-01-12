@@ -10,5 +10,9 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+if (!firebaseConfig.apiKey) {
+    console.warn("Firebase Configuration missing. Authentication will be disabled.");
+}
+
+const app = firebaseConfig.apiKey ? initializeApp(firebaseConfig) : null;
+export const auth = app ? getAuth(app) : null;
