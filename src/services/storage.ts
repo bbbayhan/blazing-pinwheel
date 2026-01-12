@@ -1,6 +1,15 @@
 import type { Book } from '../types';
+import { auth } from '../firebase-config';
 
-const API_URL = 'http://localhost:3001/api/books';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/books';
+
+const getAuthHeaders = async () => {
+    const token = await auth.currentUser?.getIdToken();
+    return {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+};
 
 export const loadBooks = async (): Promise<Book[]> => {
     try {
@@ -14,16 +23,13 @@ export const loadBooks = async (): Promise<Book[]> => {
 };
 
 export const saveBooks = async () => {
-    // No-op for now as we are moving to individual API calls
-    // or we can implement a bulk sync if needed.
-    // But standard pattern is to use API calls on action (add/delete/update)
-    // rather than syncing the whole state "onChange".
+    // No-op
 };
 
 export const addBook = async (book: Book) => {
     await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthHeaders(),
         body: JSON.stringify(book),
     });
 };
@@ -31,7 +37,7 @@ export const addBook = async (book: Book) => {
 export const addBooks = async (books: Book[]) => {
     await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthHeaders(),
         body: JSON.stringify(books),
     });
 };
@@ -39,7 +45,7 @@ export const addBooks = async (books: Book[]) => {
 export const updateBook = async (id: string, updates: Partial<Book>) => {
     await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await getAuthHeaders(),
         body: JSON.stringify(updates),
     });
 };
@@ -47,5 +53,7 @@ export const updateBook = async (id: string, updates: Partial<Book>) => {
 export const deleteBook = async (id: string) => {
     await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
+        headers: await getAuthHeaders(),
     });
 };
+

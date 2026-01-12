@@ -7,6 +7,7 @@ import { UploadZone } from '../components/UploadZone';
 import { BookList } from '../components/BookList';
 import { Filter, ArrowUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { exportToExcel } from '../utils/export';
 
 function Home() {
     const navigate = useNavigate();
@@ -125,7 +126,7 @@ function Home() {
 
     return (
         <>
-            <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+            <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} onExport={() => exportToExcel(books)} />
 
             <main className="container">
                 <UploadZone onUpload={handleUpload} isProcessing={isProcessing} />

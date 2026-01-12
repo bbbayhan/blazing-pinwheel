@@ -4,6 +4,7 @@ import { loadBooks, deleteBook, updateBook } from '../services/storage';
 import { Header } from '../components/Header';
 import { Trash2, Edit2, Check, X, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { exportToExcel } from '../utils/export';
 
 function ListView() {
     const navigate = useNavigate();
@@ -48,7 +49,7 @@ function ListView() {
 
     return (
         <>
-            <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+            <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} onExport={() => exportToExcel(books)} />
 
             <main className="container">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>

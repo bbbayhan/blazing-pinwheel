@@ -1,12 +1,15 @@
 import React from 'react';
 import { BookOpen, Search, Cloud } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
     searchTerm: string;
     onSearchChange: (val: string) => void;
+    onExport: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange }) => {
+export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onExport }) => {
+    const { user, login, logout } = useAuth();
     return (
         <header className="glass-panel" style={{
             position: 'sticky',
@@ -36,12 +39,21 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange }) =>
 
                         <button
                             className="btn-primary"
-                            onClick={() => alert('Google Drive / Excel export feature coming soon!')}
+                            onClick={onExport}
                             style={{ fontSize: '0.875rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', boxShadow: 'none', color: 'white' }}
                         >
                             <Cloud size={16} />
                             <span className="btn-text" style={{ marginLeft: '0.5rem' }}>Export</span>
                         </button>
+
+                        {user ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <img src={user.photoURL || ''} alt="User" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+                                <button onClick={() => logout()} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.875rem' }}>Logout</button>
+                            </div>
+                        ) : (
+                            <button onClick={login} className="btn-primary">Login</button>
+                        )}
                     </div>
                 </div>
 
@@ -60,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange }) =>
                 <div className="mobile-actions" style={{ display: 'none', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem' }}>
                     <a href="/list" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>Go to List View</a>
                     <button
-                        onClick={() => alert('Export soon!')}
+                        onClick={onExport}
                         style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
                     >
                         <Cloud size={20} />
