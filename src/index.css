@@ -1,15 +1,25 @@
 :root {
-  --bg-app: #0f172a;
-  --bg-card: rgba(30, 41, 59, 0.7);
-  --bg-card-hover: rgba(51, 65, 85, 0.8);
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --accent: #38bdf8;
-  --accent-glow: rgba(56, 189, 248, 0.3);
-  --border: rgba(148, 163, 184, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  /* Light Theme */
+  --bg-app: #f8fafc;
+  /* Very light cool grey */
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+
+  --text-primary: #1e293b;
+  /* Dark slate - high contrast */
+  --text-secondary: #475569;
+  /* Medium slate */
+
+  --accent: #2563eb;
+  /* Strong blue for readability */
+  --accent-glow: rgba(37, 99, 235, 0.2);
+
+  --border: #e2e8f0;
+  --glass-border: rgba(0, 0, 0, 0.05);
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-size-base: 18px;
+  /* Larger base font */
 }
 
 body {
@@ -20,10 +30,10 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
-  /* Subtle gradient background */
+  /* Subtle light gradient background */
   background-image:
-    radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%);
   background-attachment: fixed;
 }
 
@@ -48,7 +58,8 @@ button {
 
 .btn-primary {
   background: var(--accent);
-  color: #0f172a;
+  color: #ffffff;
+  /* White text for contrast */
   /* Dark text on bright accent */
   border: none;
   padding: 0.75rem 1.5rem;
@@ -89,7 +100,7 @@ button {
 
 input,
 select {
-  background: rgba(15, 23, 42, 0.6);
+  background: #ffffff;
   border: 1px solid var(--border);
   color: var(--text-primary);
   padding: 0.75rem 1rem;
@@ -130,7 +141,7 @@ select:focus {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  background: #1e293b;
+  background: #f1f5f9;
 }
 
 .card-body {

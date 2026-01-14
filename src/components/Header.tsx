@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
-import { BookOpen, Search, Cloud, Upload } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { BookOpen, Search, Cloud, Upload, List } from 'lucide-react';
 import { importFromExcel } from '../utils/import';
 import { addBooks } from '../services/storage';
 
@@ -11,7 +10,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onExport }) => {
-    const { user, login, logout } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleImportClick = () => {
@@ -64,18 +62,32 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onEx
                         }}>
                             <BookOpen color="#0f172a" size={24} />
                         </div>
-                        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, background: 'linear-gradient(to right, white, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>
+                        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', marginRight: '1rem' }}>
                             BookKeeper
                         </h1>
                     </div>
 
                     <div className="desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <a href="/list" style={{ color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>List View</a>
+                        <a
+                            href="/list"
+                            className="btn-primary"
+                            style={{
+                                fontSize: '0.875rem',
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                color: 'white'
+                            }}
+                        >
+                            <List size={16} />
+                            <span className="btn-text">List View</span>
+                        </a>
 
                         <button
                             className="btn-primary"
                             onClick={handleImportClick}
-                            style={{ fontSize: '0.875rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', boxShadow: 'none', color: 'white' }}
+                            style={{ fontSize: '0.875rem' }}
                         >
                             <Upload size={16} />
                             <span className="btn-text" style={{ marginLeft: '0.5rem' }}>Import</span>
@@ -84,20 +96,11 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onEx
                         <button
                             className="btn-primary"
                             onClick={onExport}
-                            style={{ fontSize: '0.875rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', boxShadow: 'none', color: 'white' }}
+                            style={{ fontSize: '0.875rem' }}
                         >
                             <Cloud size={16} />
                             <span className="btn-text" style={{ marginLeft: '0.5rem' }}>Export</span>
                         </button>
-
-                        {user ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <img src={user.photoURL || ''} alt="User" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
-                                <button onClick={() => logout()} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.875rem' }}>Logout</button>
-                            </div>
-                        ) : (
-                            <button onClick={login} className="btn-primary">Login</button>
-                        )}
                     </div>
                 </div>
 
