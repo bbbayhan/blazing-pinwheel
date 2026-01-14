@@ -1,6 +1,8 @@
-import React from 'react';
-import { BookOpen, Search, Cloud } from 'lucide-react';
+import React, { useRef } from 'react';
+import { BookOpen, Search, Cloud, Upload } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { importFromExcel } from '../utils/import';
+import { addBooks } from '../services/storage';
 
 interface HeaderProps {
     searchTerm: string;
@@ -10,6 +12,31 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onExport }) => {
     const { user, login, logout } = useAuth();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (confirm(`Import books from "${file.name}"? This will add them to your collection.`)) {
+            try {
+                const books = await importFromExcel(file);
+                await addBooks(books);
+                alert(`Successfully imported ${books.length} books! Refreshing page...`);
+                window.location.reload();
+            } catch (err) {
+                console.error(err);
+                alert('Failed to import books. Please check the file format.');
+            }
+        }
+        // Reset input
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
     return (
         <header className="glass-panel" style={{
             position: 'sticky',
@@ -18,6 +45,14 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onEx
             borderRadius: '0 0 1rem 1rem',
             marginBottom: '2rem'
         }}>
+            <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                accept=".xlsx,.xls,.csv"
+                onChange={handleFileChange}
+            />
+
             <div className="container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -36,6 +71,15 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onEx
 
                     <div className="desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <a href="/list" style={{ color: 'var(--text-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>List View</a>
+
+                        <button
+                            className="btn-primary"
+                            onClick={handleImportClick}
+                            style={{ fontSize: '0.875rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', boxShadow: 'none', color: 'white' }}
+                        >
+                            <Upload size={16} />
+                            <span className="btn-text" style={{ marginLeft: '0.5rem' }}>Import</span>
+                        </button>
 
                         <button
                             className="btn-primary"
@@ -71,6 +115,12 @@ export const Header: React.FC<HeaderProps> = ({ searchTerm, onSearchChange, onEx
                 {/* Mobile Actions Only */}
                 <div className="mobile-actions" style={{ display: 'none', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '0.5rem' }}>
                     <a href="/list" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>Go to List View</a>
+                    <button
+                        onClick={handleImportClick}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
+                    >
+                        <Upload size={20} />
+                    </button>
                     <button
                         onClick={onExport}
                         style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}

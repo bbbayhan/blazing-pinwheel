@@ -1,23 +1,29 @@
+import {
+    collection,
+    doc,
+    getDocs,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    query,
+    orderBy
+} from 'firebase/firestore';
+import { db } from '../firebase-config';
 import type { Book } from '../types';
-import { auth } from '../firebase-config';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/books';
-
-const getAuthHeaders = async () => {
-    const token = await auth?.currentUser?.getIdToken();
-    return {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
-};
+const COLLECTION_NAME = 'books';
 
 export const loadBooks = async (): Promise<Book[]> => {
+    if (!db) {
+        console.warn("Firestore not initialized");
+        return [];
+    }
     try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error('Failed to fetch books');
-        return await res.json();
+        const q = query(collection(db, COLLECTION_NAME), orderBy('dateAdded', 'desc'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(d => d.data() as Book);
     } catch (e) {
-        console.error(e);
+        console.error("Error loading books from Firestore:", e);
         return [];
     }
 };
@@ -27,33 +33,40 @@ export const saveBooks = async () => {
 };
 
 export const addBook = async (book: Book) => {
-    await fetch(API_URL, {
-        method: 'POST',
-        headers: await getAuthHeaders(),
-        body: JSON.stringify(book),
-    });
+    if (!db) return;
+    try {
+        // We use setDoc with book.id so we control the ID (consistent with previous behavior)
+        await setDoc(doc(db, COLLECTION_NAME, book.id), book);
+    } catch (e) {
+        console.error("Error adding book to Firestore:", e);
+        throw e;
+    }
 };
 
 export const addBooks = async (books: Book[]) => {
-    await fetch(API_URL, {
-        method: 'POST',
-        headers: await getAuthHeaders(),
-        body: JSON.stringify(books),
-    });
+    if (!db) return;
+    // For large batches, writeBatch should be used, but for simplicity:
+    await Promise.all(books.map(book => addBook(book)));
 };
 
 export const updateBook = async (id: string, updates: Partial<Book>) => {
-    await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: await getAuthHeaders(),
-        body: JSON.stringify(updates),
-    });
+    if (!db) return;
+    const docRef = doc(db, COLLECTION_NAME, id);
+    try {
+        await updateDoc(docRef, updates);
+    } catch (e) {
+        console.error("Error updating book in Firestore:", e);
+        throw e;
+    }
 };
 
 export const deleteBook = async (id: string) => {
-    await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-        headers: await getAuthHeaders(),
-    });
+    if (!db) return;
+    try {
+        await deleteDoc(doc(db, COLLECTION_NAME, id));
+    } catch (e) {
+        console.error("Error deleting book from Firestore:", e);
+        throw e;
+    }
 };
 
