@@ -27,3 +27,8 @@ dist-ssr
 server/node_modules
 server/books.db
 .env
+
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
